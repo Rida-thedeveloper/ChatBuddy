@@ -11,16 +11,17 @@ import java.util.ArrayList;
 
 public class MyStompSessionHandler extends StompSessionHandlerAdapter {
     private String username;
-    private MessageListener messageListener;
+  
 
-    public MyStompSessionHandler(MessageListener messageListener, String username){
+    public MyStompSessionHandler(String username){
         this.username = username;
-        this.messageListener = messageListener;
+       
     }
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         System.out.println("Client Connected");
+        session.send("/app/connect",username);
 
         session.subscribe("/topic/messages", new StompFrameHandler() {
             @Override
@@ -33,7 +34,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
                 try {
                     if (payload instanceof Message) {
                         Message message = (Message) payload;
-                        messageListener.onMessageRecieve(message);
+                       
                         System.out.println("Received message: " + message.getUser() + ": " + message.getMessage());
                     } else {
                         System.out.println("Received unexpected payload type: " + payload.getClass());
@@ -56,7 +57,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
                 try{
                     if(payload instanceof ArrayList){
                         ArrayList<String> activeUsers = (ArrayList<String>) payload;
-                        messageListener.onActiveUsersUpdated(activeUsers);
+                        
                         System.out.println("Received active users: " + activeUsers);
                     }
                 }catch(Exception e){
